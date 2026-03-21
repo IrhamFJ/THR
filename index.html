@@ -5,15 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Konfirmasi Penerimaan THR 2026 🌙</title>
     <style>
-        body { margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+        body { 
+            margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; 
+            overflow: hidden; display: flex; align-items: center; justify-content: center; 
+            height: 100vh; text-align: center; 
+        }
         
-        /* Panggil file amplop.png lo */
+        /* Container buat teks */
+        #intro {
+            position: absolute;
+            top: 20px; /* Jarak dari atas */
+            width: 100%;
+            padding: 0 10px;
+            box-sizing: border-box;
+            z-index: 5;
+        }
+        #intro h1 { 
+            color: #15803d; 
+            margin-bottom: 5px; /* Jarak kecil ke paragraf */
+        }
+        #intro p { 
+            color: #166534; 
+            margin-top: 0; 
+            margin-bottom: 50px; /* Jarak Gede biar Gak Ditimpa Amplop */
+        }
+
+        /* AMPLOP JADI GEDE WOY (280px) */
         #envelope { 
-            width: 180px; 
+            width: 280px; 
             cursor: pointer; 
-            position: absolute; 
+            position: relative; /* relative biar ngikutin layout teks awal */
             transition: all 0.2s ease; 
             z-index: 10; 
+            margin-top: 150px; /* Tambahin jarak manual ke bawah dari teks */
         }
         
         /* Layar Prank Fullscreen */
@@ -53,8 +77,8 @@
 <body>
 
     <div id="intro">
-        <h1 style="color: #15803d;">Selamat Lebaran! 🌙</h1>
-        <p style="color: #166534;">Ketuk amplop di bawah untuk klaim THR kamu.</p>
+        <h1>Selamat Lebaran! 🌙</h1>
+        <p>Ketuk amplop di bawah untuk klaim THR kamu.</p>
     </div>
 
     <img id="envelope" src="amplop.png" alt="Amplop THR">
@@ -66,7 +90,7 @@
 
     <div id="prank-screen" onclick="location.reload()">
         <img src="monyet-memberikan-jari-tengah-kepada-orang-orang.jpg">
-        <h1 style="color: white; position: absolute; bottom: 20px; font-size: 1.5rem;">CIE KENA PRANK! 🐒</h1>
+        <h1 style="color: white; position: absolute; bottom: 20px; font-size: 1.5rem; text-shadow: 1px 1px 2px black;">CIE KENA PRANK! 🐒</h1>
     </div>
 
     <script>
@@ -81,8 +105,10 @@
         let count = 0;
         const move = () => {
             if (count < 3) {
-                env.style.left = Math.random() * (window.innerWidth - 180) + 'px';
-                env.style.top = Math.random() * (window.innerHeight - 180) + 'px';
+                // Posisi jadi FIXED pas mulai lari
+                env.style.position = 'fixed';
+                env.style.left = Math.random() * (window.innerWidth - 280) + 'px';
+                env.style.top = Math.random() * (window.innerHeight - 280) + 'px';
                 count++;
             }
         };
