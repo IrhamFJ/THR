@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfirmasi Penerimaan THR 2026 🌙</title>
+    <style>
+        body { margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+        #envelope { width: 150px; cursor: pointer; position: absolute; transition: all 0.2s ease; z-index: 10; }
+        
+        /* Layar Prank */
+        #prank-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+        #prank-screen img { width: 100%; height: 100%; object-fit: contain; }
+        
+        /* Loading Palsu */
+        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 50; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #15803d; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="intro">
+        <h1 style="color: #15803d;">Selamat Lebaran! 🌙</h1>
+        <p style="color: #166534;">Silakan ketuk amplop untuk klaim saldo THR Anda.</p>
+    </div>
+
+    <img id="envelope" src="https://cdn-icons-png.flaticon.com/512/3814/3814421.png" alt="Amplop">
+
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p id="status-text" style="margin-top: 15px; font-weight: bold; color: #15803d;">Menghubungkan ke server bank...</p>
+    </div>
+
+    <div id="prank-screen" onclick="location.reload()">
+        <img src="monyet-memberikan-jari-tengah-kepada-orang-orang.jpg">
+        <h1 style="color: white; position: absolute; bottom: 20px;">CIE KENA PRANK! 🐒</h1>
+    </div>
+
+    <script>
+        const env = document.getElementById('envelope');
+        const loading = document.getElementById('loading-overlay');
+        const statusText = document.getElementById('status-text');
+        const prank = document.getElementById('prank-screen');
+        
+        // Sound pilihan gue: Ketawa Monyet/Meme yang nyebelin
+        const prankSound = new Audio('https://www.myinstants.com/media/sounds/monkey-laugh.mp3');
+
+        let count = 0;
+        const move = () => {
+            if (count < 3) {
+                env.style.left = Math.random() * (window.innerWidth - 150) + 'px';
+                env.style.top = Math.random() * (window.innerHeight - 150) + 'px';
+                count++;
+            }
+        };
+
+        env.addEventListener('mouseover', move);
+        env.addEventListener('touchstart', move);
+
+        env.addEventListener('click', () => {
+            // 1. Tampilkan loading biar dia berharap
+            loading.style.display = 'flex';
+            
+            // 2. Ganti-ganti teks loading biar meyakinkan
+            setTimeout(() => { statusText.innerText = "Memverifikasi data penerima..."; }, 1000);
+            setTimeout(() => { statusText.innerText = "Proses transfer Rp 500.000..."; }, 2500);
+
+            // 3. Eksekusi Prank setelah 4 detik
+            setTimeout(() => {
+                loading.style.display = 'none';
+                prank.style.display = 'flex';
+                document.title = "CIE KENA PRANK! 😜";
+                
+                // Mainin suara pilihan gue
+                prankSound.play().catch(e => console.log("User must interact first"));
+
+                // Getar HP
+                if (navigator.vibrate) navigator.vibrate([500, 100, 500]);
+
+                // Fullscreen
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) elem.requestFullscreen();
+                else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            }, 4000);
+        });
+    </script>
+</body>
+</html>
